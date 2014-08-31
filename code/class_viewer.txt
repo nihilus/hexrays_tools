@@ -1,0 +1,15 @@
+CLASS:  classname:  parent1, parent2, parent2
+vftable: %d
+functions:
+ func1
+ func2
+ func3
+
+
+index - class idx,
+what to show - class declaration, vftable location, functions
+sub what to show - 
+
+
+
+show graph of classes!!!

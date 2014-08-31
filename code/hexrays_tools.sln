@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hexrays_tools", "hexrays_tools.vcxproj", "{C05CD030-0298-4E2E-9919-CF0BF48114EC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		beta 6.2 debug|Any CPU = beta 6.2 debug|Any CPU
+		beta 6.2 debug|Mixed Platforms = beta 6.2 debug|Mixed Platforms
+		beta 6.2 debug|Win32 = beta 6.2 debug|Win32
+		beta 6.3 debug|Any CPU = beta 6.3 debug|Any CPU
+		beta 6.3 debug|Mixed Platforms = beta 6.3 debug|Mixed Platforms
+		beta 6.3 debug|Win32 = beta 6.3 debug|Win32
+		beta 6.4 debug|Any CPU = beta 6.4 debug|Any CPU
+		beta 6.4 debug|Mixed Platforms = beta 6.4 debug|Mixed Platforms
+		beta 6.4 debug|Win32 = beta 6.4 debug|Win32
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|Win32 = Debug|Win32
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.2 debug|Any CPU.ActiveCfg = beta 6.2 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.2 debug|Mixed Platforms.ActiveCfg = beta 6.2 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.2 debug|Mixed Platforms.Build.0 = beta 6.2 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.2 debug|Win32.ActiveCfg = beta 6.2 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.2 debug|Win32.Build.0 = beta 6.2 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.3 debug|Any CPU.ActiveCfg = beta 6.3 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.3 debug|Mixed Platforms.ActiveCfg = beta 6.3 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.3 debug|Mixed Platforms.Build.0 = beta 6.3 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.3 debug|Win32.ActiveCfg = beta 6.3 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.3 debug|Win32.Build.0 = beta 6.3 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.4 debug|Any CPU.ActiveCfg = beta 6.4 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.4 debug|Mixed Platforms.ActiveCfg = beta 6.4 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.4 debug|Mixed Platforms.Build.0 = beta 6.4 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.4 debug|Win32.ActiveCfg = beta 6.4 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.beta 6.4 debug|Win32.Build.0 = beta 6.4 debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.Debug|Win32.Build.0 = Debug|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.Release|Any CPU.ActiveCfg = Release|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.Release|Win32.ActiveCfg = Release|Win32
+		{C05CD030-0298-4E2E-9919-CF0BF48114EC}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
