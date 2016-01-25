@@ -43,8 +43,8 @@ tid_t get_struc_from_typestring_my(tinfo_t t)
 		return import_type(idati, -1, name);
 	}
 	{
-		char temp[MAXSTR];
-		t.print(temp, MAXSTR);
+		qstring temp;
+		t.print(&temp);
 		//msg("get_struc_from_typestring: %s\n", tmp);
 		//QASSERT(112, false);
 	}
@@ -52,16 +52,16 @@ tid_t get_struc_from_typestring_my(tinfo_t t)
 }
 
 #if IDA_SDK_VERSION >= 630
-tid_t get_struc_from_typestring(typestring t)
+tid_t get_struc_from_typestring(tinfo_t t)
 {
-	typestring tmp = t;
+	tinfo_t tmp = t;
 	char buf[MAXSTR];
 	if(!get_name_of_named_type(buf, sizeof(buf), t.c_str()))
 		return get_struc_from_typestring_my(t);
 	return import_type(idati, -1, buf);
 }
 #else
-tid_t get_struc_from_typestring(typestring t)
+tid_t get_struc_from_typestring(tinfo_t t)
 {
 	return get_struc_from_typestring_my(t);	
 }

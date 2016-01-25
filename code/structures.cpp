@@ -103,7 +103,9 @@ bool extract_substruct(uval_t idx, uval_t begin, uval_t end)
 	//create_typedef();
 
 	char name[MAXSTR];
-	get_struc_name(newid, name, MAXSTR);
+	qstring tmpname;
+	get_struc_name(&tmpname, newid);
+	qstrncpy(name, tmpname.c_str(), MAXSTR);
 	qstrncat(name, " dummy;", MAXSTR);
 	parse_decl(idati, name, &qname, &type, &fields, PT_VAR);
 

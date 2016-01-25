@@ -167,7 +167,7 @@ struct ida_local ptr_checker_t : public ctree_parentee_t
 		return type;
 	}
 
-	void handle_vtables(bool &is_ptr, uint64 &delta, int i, typestring & t)
+	void handle_vtables(bool &is_ptr, uint64 &delta, int i, tinfo_t & t)
 	{		
 		{
 			int j = i;
@@ -195,9 +195,9 @@ struct ida_local ptr_checker_t : public ctree_parentee_t
 					tid_t tid = is_vt(obj->obj_ea, &vt_len);
 					if(tid!=BADNODE)
 					{
-						char name[MAXNAMELEN];
-						get_struc_name(tid, name, sizeof(name));
-						t = make_pointer(create_typedef(name));
+						qstring name;
+						get_struc_name(&name, tid);
+						t = make_pointer(create_typedef(name.c_str()));
 						for(unsigned int k = 0; k<vt_len; k++)
 						{
 							ea_t fncea = get_long(obj->obj_ea + 4*k );
@@ -443,7 +443,7 @@ int strtype_info_v2_t::add_gaps()
 
 
 //-------------------------------------------------------------------------
-bool strtype_info_v2_t::build_udt_type(typestring &restype, typestring &resfields)
+bool strtype_info_v2_t::build_udt_type(tinfo_t &restype, tinfo_t &resfields)
 {
 	if ( empty() )
 		return false;
@@ -639,7 +639,7 @@ bool field_info_t::convert_to_strtype_info(strtype_info_v2_t *strinfo, field_inf
 	return true;
 }
 
-bool structure_from_restype_resfields(qstring &varname, typestring &out_type, typestring &restype, typestring &resfields)
+bool structure_from_restype_resfields(qstring &varname, tinfo_t &out_type, tinfo_t &restype, tinfo_t &resfields)
 {	
 	qstring strucname = "struct_";
 	strucname += varname;
@@ -706,7 +706,7 @@ bool structure_from_restype_resfields(qstring &varname, typestring &out_type, ty
 }
 
 
-bool field_info_t::to_type(qstring varname, typestring & out_type, strtype_info_v2_t *sti, field_info_t::iterator * bgn, field_info_t::iterator * end )
+bool field_info_t::to_type(qstring varname, tinfo_t & out_type, strtype_info_v2_t *sti, field_info_t::iterator * bgn, field_info_t::iterator * end )
 {
 	strtype_info_v2_t sti2;
 	if (!sti)
@@ -714,8 +714,8 @@ bool field_info_t::to_type(qstring varname, typestring & out_type, strtype_info_
 
 	if(!convert_to_strtype_info(sti, bgn, end))
 		return false;
-	typestring restype;
-	typestring resfields;
+	tinfo_t restype;
+	tinfo_t resfields;
 	sti->build_udt_type(restype, resfields);
 	return structure_from_restype_resfields(varname, out_type, restype, resfields);
 }

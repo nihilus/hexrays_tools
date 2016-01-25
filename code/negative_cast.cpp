@@ -664,19 +664,19 @@ void convert_test(cexpr_t *e)
 			else			
 			{
 				carg_t * arg3 = new carg_t();
-				char type_text[MAXSTR];
+				qstring type_text;
 				tinfo_t t2 = t;
 				t2.remove_ptr_or_array();	
-				t2.print(type_text, MAXSTR);
+				t2.print(&type_text);
 
 				cexpr_t * hlpr = create_helper(true, t2, "%s", type_text);
 				arg3->consume_cexpr(hlpr);
 				arglist->push_back(*arg3);
 				
-				print_struct_member_name(get_struc( get_struc_from_typestring(t2) ), offset+mem_ptr_offset, type_text, MAXSTR );
-				const char * tn = qstrchr(type_text, '.');
+				print_struct_member_name(get_struc( get_struc_from_typestring(t2) ), offset+mem_ptr_offset, (char *)type_text.c_str(), MAXSTR );
+				const char * tn = qstrchr(type_text.c_str(), '.');
 				if (!tn)
-					tn = type_text;
+					tn = type_text.c_str();
 				else
 					tn++;
 			
@@ -799,14 +799,14 @@ bool idaapi change_negative_cast_callback(void *ud)
 		t = cache->cast_to;
 	}
 
-	char definition[MAXSTR];
-	t.print(definition, MAXSTR);
+	qstring definition;
+	t.print(&definition);
 	qtype qt;
 
 	char declaration[MAXSTR];
 	char * answer;
 
-	while(answer = askstr(HIST_TYPE, definition, "[Hexrays-Tools] Gimme new negative cast type"))
+	while(answer = askstr(HIST_TYPE, definition.c_str(), "[Hexrays-Tools] Gimme new negative cast type"))
 	{
 		qstrncpy(declaration, answer, MAXSTR);
 		//notice:

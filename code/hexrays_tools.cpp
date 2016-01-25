@@ -723,9 +723,9 @@ struct offset_locator_t : public ctree_parentee_t
 					if (t.size()>0)
 					{
 						types[(int)delta] = t;
-						char buff[MAXSTR];
-						t.print(buff, sizeof(buff));
-						msg("[Hexrays-Tools] new var: %s.%d [%s][array: %d]\n", (*lvars)[index].name.c_str(), (int)delta, buff, is_array);
+						qstring buff;
+						t.print(&buff);
+						msg("[Hexrays-Tools] new var: %s.%d [%s][array: %d]\n", (*lvars)[index].name.c_str(), (int)delta, buff.c_str(), is_array);
 					}
 					else
 						msg("[Hexrays-Tools] new var: %s.%d[array:%d]\n", (*lvars)[index].name.c_str(), (int)delta, is_array);
@@ -940,8 +940,8 @@ tid_t create_VT_struc(ea_t VT_ea, char * name, uval_t idx = BADADDR, unsigned in
 		char * fncname = NULL;
 		if (isFunc(fnc_flags) /*&& has_user_name(fnc_flags)*/ )
 		{
-			if ( get_short_name(BADADDR, fncea,  funcname, sizeof(funcname)) )
-			//if(get_func_name(fncea, funcname, MAXSTR))
+			//if ( get_short_name(BADADDR, fncea,  funcname, sizeof(funcname)) )
+			if(get_func_name(fncea, funcname, MAXSTR))
 				fncname = funcname;
 		}		
 		add_struc_member(newstruc, NULL, offset, dwrdflag(), NULL, 4);
@@ -1504,7 +1504,7 @@ static bool idaapi convert_to_usercall(void *ud)
 		return false;
 	if ( vu.cfunc->entry_ea == BADADDR )
 		return false;
-	typestring type;
+	tinfo_t type;
 	qtype fields;		
 	if (!vu.cfunc->get_func_type(type, fields))
 		return false;
@@ -1554,7 +1554,7 @@ static bool new_structure_from_offset_locator(offset_locator_t &ifi, char name[M
 		std::map<int, tinfo_t>::iterator i = ifi.types.find(offset);
 		if (i != ifi.types.end())
 		{
-			typestring ts = i->second;
+			tinfo_t ts = i->second;
 			ts.remove_ptr_or_array();
 			const type_t * t = ts.resolve();
 
@@ -1585,7 +1585,9 @@ static bool new_structure_from_offset_locator(offset_locator_t &ifi, char name[M
 		if( err != 0)
 			msg("[Hexrays-Tools] failed to add member at offset %d err %d\n", offset, err);
 	}
-	get_struc_name( id, name, MAXSTR );
+	qstring tmpname;
+	get_struc_name(&tmpname, id);
+	qstrncpy(name, tmpname.c_str(), MAXSTR);
 	msg("[Hexrays-Tools] created struct %s\n", name);
 	return false;
 }
@@ -1668,8 +1670,8 @@ static bool idaapi traverse_(void *ud)
 			int idx = get_idx_of(lvars, var);
 			strtype_info_t typeinfo;
 			vu.cfunc->gather_derefs(idx, &typeinfo);
-			typestring restype;
-			typestring resfields;
+			tinfo_t restype;
+			tinfo_t resfields;
 			typeinfo.build_udt_type(&restype, &resfields);
 
 			tinfo_t ts;			
@@ -1725,7 +1727,7 @@ static bool idaapi is_number(void *ud)
      -> y -> something with type B
 
 */
-static bool idaapi is_cast_assign(void *ud, typestring * ts)
+static bool idaapi is_cast_assign(void *ud, tinfo_t * ts)
 {
 	vdui_t &vu = *(vdui_t *)ud;
 	if (!vu.item.is_citem())

@@ -7,7 +7,7 @@ struct meminfo_v2_t
 	uint64 offset;
 	tinfo_t type;
 	uint64 size;
-	typestring fields;
+	tinfo_t fields;
 };
 
 struct typerecord_t
@@ -26,7 +26,7 @@ struct typerecord_t
 struct typevec_t:qvector<typerecord_t>
 {
 	unsigned int disabled_count;
-	bool get_first_enabled(typestring & type)
+	bool get_first_enabled(tinfo_t & type)
 	{		
 		for(iterator i=begin(); i!=end(); i++)
 		{
@@ -65,11 +65,11 @@ struct strtype_info_v2_t:qvector<meminfo_v2_t>
 {
 	type_t basetype;
 	unsigned int N;
-	bool build_udt_type(typestring &restype, typestring &resfields);
+	bool build_udt_type(tinfo_t &restype, tinfo_t &resfields);
 	int add_gaps();	
-	void build_struct_type( typestring &outtype, typestring &outfields) const;
+	void build_struct_type( tinfo_t &outtype, tinfo_t &outfields) const;
 
-	bool getat(int offset, typestring & t)
+	bool getat(int offset, tinfo_t & t)
 	{
 		iterator i = std::find_if(begin(), end(), [=](value_type & t){return t.offset == offset;});
 		if (i == end())
@@ -97,7 +97,7 @@ typedef std::set<ea_t> visited_functions_t;
 typedef qvector<ea_t> global_pointers_t;
 typedef std::pair<int,lvar_locator_t> scanned_variable_t;
 typedef std::map<ea_t,  qvector<scanned_variable_t>> scanned_variables_t;
-typedef std::map<int,  typestring> types_cache_t;
+typedef std::map<int,  tinfo_t> types_cache_t;
 
 //mapping offset -> set of possible types
 struct field_info_t: std::map<uval_t, scan_info_v2_t>
@@ -117,7 +117,7 @@ struct field_info_t: std::map<uval_t, scan_info_v2_t>
 	void update_max_offset(unsigned int current, unsigned int max);
 	unsigned int types_at_idx_qty(unsigned int idx) const;
 	bool flip_enabled_status(unsigned int idx, unsigned int position);
-	bool to_type(qstring varname, typestring & out_type, strtype_info_v2_t *sti = nullptr, field_info_t::iterator * bgn = nullptr, field_info_t::iterator * end = nullptr );
+	bool to_type(qstring varname, tinfo_t & out_type, strtype_info_v2_t *sti = nullptr, field_info_t::iterator * bgn = nullptr, field_info_t::iterator * end = nullptr );
 	bool convert_to_strtype_info(strtype_info_v2_t *strinfo, field_info_t::iterator * bgn = nullptr, field_info_t::iterator * end_ = nullptr );
 	void clear();	
 };
@@ -125,4 +125,4 @@ struct field_info_t: std::map<uval_t, scan_info_v2_t>
 
 //extern bool can_be_converted_to_ptr(cfunc_t *cfunc, int varidx, strtype_info_v2_t *strinfo);
 extern bool can_be_converted_to_ptr2(vdui_t &vu, ctree_item_t & item, field_info_t * fields);
-extern bool structure_from_restype_resfields(qstring &varname, typestring &out_type, typestring &restype, typestring &resfields);
+extern bool structure_from_restype_resfields(qstring &varname, tinfo_t &out_type, tinfo_t &restype, tinfo_t &resfields);
