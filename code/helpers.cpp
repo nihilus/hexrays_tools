@@ -89,9 +89,9 @@ int get_idx_of_lvar(vdui_t &vu, lvar_t *lvar)
 	return get_idx_of(vu.cfunc->get_lvars(), lvar);
 }
 
-typestring create_numbered_type_from_name(const char * name)
+tinfo_t create_numbered_type_from_name(const char * name)
 {
-	typestring out_type;
+	tinfo_t out_type;
 	int32 ord = get_type_ordinal(idati, name);
 	char ordname[32];
 	memset(ordname, 0, sizeof(ordname));

@@ -153,7 +153,7 @@ static cexpr_t *find_memptr_var(vdui_t &vu, bool * is_call = 0, ea_t * ea = 0 )
 			if ( e->x->op == cot_idx )
 				e = e->x;
 
-			typestring t = e->x->type;
+			tinfo_t t = e->x->type;
 			while (t.is_ptr_or_array())
 				t.remove_ptr_or_array();
 
@@ -811,7 +811,9 @@ void idaapi get_type_line(void *obj,uint32 n,char * const *arrptr)
 	{
 		tid_t id = (*vec)[n-2];
 		asize_t size = get_struc_size(id);
-		get_struc_name(id, arrptr[0], MAXSTR);		
+		qstring name;
+		get_struc_name(&name, id);		
+		qsnprintf(arrptr[0], MAXSTR, "%s", name);
 		qsnprintf(arrptr[1], MAXSTR, "%d", size);
 		qsnprintf(arrptr[2], MAXSTR, "0x%08x", size);
 	}	
@@ -1270,19 +1272,19 @@ static bool idaapi var_testing2(void *ud)
 	if (!name_for_struct_crawler(vu, name, &lvar, &ea))
 		return false;
 
-	typestring type;
+	tinfo_t type;
 	strtype_info_v2_t sti;
 	if (!fi.to_type(name, type, &sti))
 		return false;
 	
 
 
-	typestring restype = make_pointer(type);
+	tinfo_t restype = make_pointer(type);
 	
 #if 1
 	std::for_each(fi.scanned_variables.begin(), fi.scanned_variables.end(), [&](std::pair<scanned_variables_t::key_type, scanned_variables_t::mapped_type> p)
 	{
-		typestring typ = restype;
+		tinfo_t typ = restype;
 		func_t * func = get_func(p.first);
 		if (!func)
 			return;
@@ -1317,7 +1319,7 @@ static bool idaapi var_testing2(void *ud)
 				}
 				else
 				{
-					typestring tt;
+					tinfo_t tt;
 					tt.clear();
 					
 					if (fi.types_cache.find(x.first) != fi.types_cache.end())
@@ -1855,11 +1857,11 @@ int isOKToExecuteMemory(void    *ptr,
 }
 
 
-C<char   __fastcall  (vdui_t *, lvar_t *, typestring *), 0x17097C10> do_set_lvar_type;
+C<char   __fastcall  (vdui_t *, lvar_t *, tinfo_t *), 0x17097C10> do_set_lvar_type;
 //typedef char  ( __fastcall  * do_set_lvar_type_t)(vdui_t *, lvar_t *, typestring *);
 //do_set_lvar_type_t do_set_lvar_type  = (do_set_lvar_type_t)0x17097C10;
 
-bool set_lvar_type(vdui_t * vu, lvar_t *  lv, typestring * ts)
+bool set_lvar_type(vdui_t * vu, lvar_t *  lv, tinfo_t * ts)
 {
 	
 	if(!(vu && lv && ts ))
@@ -1879,7 +1881,7 @@ bool set_lvar_type(vdui_t * vu, lvar_t *  lv, typestring * ts)
 static bool idaapi cast_assign(void *ud)
 {
 	vdui_t &vu = *(vdui_t *)ud;
-	typestring ts;
+	tinfo_t ts;
 	if(!is_cast_assign(ud, &ts))
 		return false;
 
@@ -1890,7 +1892,7 @@ static bool idaapi cast_assign(void *ud)
 static bool idaapi vt_call_cast(void *ud)
 {
 	vdui_t &vu = *(vdui_t *)ud;
-	typestring ts;
+	tinfo_t ts;
 	return is_vt_call_cast(ud, true);	
 }
 
@@ -1926,11 +1928,11 @@ static bool idaapi possible_structs_for_one_offset(void *ud)
 	}
 	int choosed = m.choose("[Hexrays-Tools] structs with offset");//choose((void *)&m, 40, matched_structs_sizer, matched_structs_get_type_line, "possible types");
 
-	char name[MAXSTR];
+	qstring name;
 
 	if ( choosed > 0 )
 	{
-		get_struc_name( m.idcka[choosed-1], name, MAXSTR );
+		get_struc_name( &name, m.idcka[choosed-1] );
 		//typestring ts = create_typedef(name);
 		//var->set_final_lvar_type(make_pointer(ts));
 		//var->set_lvar_type(make_pointer(ts));
@@ -1965,10 +1967,10 @@ bool structs_with_this_size(asize_t size)
 	}
 	//TODO: use another functions
 	int choosed = m.choose("[Hexrays-Tools] structures of this size");//choose((void *)&m, 40, matched_structs_sizer, matched_structs_get_type_line, "possible types");
-	char name[MAXSTR];
+	qstring name;
 	if ( choosed > 0 )
 	{
-		get_struc_name( m.idcka[choosed-1], name, MAXSTR );
+		get_struc_name( &name, m.idcka[choosed-1] );
 		open_structs_window(m.idcka[choosed-1], 0);
 	}
 	return true; // done
@@ -2037,9 +2039,9 @@ void show_function_with_this_struct_tid_as_parameter(tid_t goal)
 		}		
 	}
 	hide_wait_box();
-	char name[MAXNAMESIZE];
-	get_struc_name(goal, name, MAXNAMESIZE);
-	fl.choose(name);
+	qstring name;
+	get_struc_name(&name, goal);
+	fl.choose((char *)name.c_str());
 	fl.open_pseudocode();
 }
 

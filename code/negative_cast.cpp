@@ -153,7 +153,7 @@ bool fill_graphreferences()
 				}
 
 				{
-					typestring t;
+					tinfo_t t;
 					if(get_member_type(member, &t))
 					{
 						tid_t referenced = get_struc_from_typestring(t);
@@ -356,8 +356,8 @@ public:
 class negative_cast_t
 {
 public:
-	typestring cast_from;
-	typestring cast_to;
+	tinfo_t cast_from;
+	tinfo_t cast_to;
 	int offset;
 
 	int mem_ptr_offset;
@@ -365,14 +365,14 @@ public:
 
 	negative_cast_t(void)
 	{		
-		cast_from = typestring();
-		cast_to = typestring();
+		cast_from = tinfo_t();
+		cast_to = tinfo_t();
 		int offset = 0;
 		is_mem_ptr = false;
 		mem_ptr_offset = 0;
 	}
 
-	negative_cast_t(typestring from, typestring to, int off)
+	negative_cast_t(tinfo_t from, tinfo_t to, int off)
 	{
 		cast_from = from;
 		cast_to = to;
@@ -425,7 +425,7 @@ public:
 typedef qvector<negative_cast_t>  nctvec_t;
 static nctvec_t negative_casts;
 
-negative_cast_t * find_cached_cast(typestring from, int offset )
+negative_cast_t * find_cached_cast(tinfo_t from, int offset )
 {
 	nctvec_t::iterator i = negative_casts.begin();
 	while (i != negative_casts.end())
@@ -440,7 +440,7 @@ negative_cast_t * find_cached_cast(typestring from, int offset )
 	return NULL;
 }
 
-negative_cast_t * find_cached_cast_2(typestring from, int offset )
+negative_cast_t * find_cached_cast_2(tinfo_t from, int offset )
 {	
 	nctvec_t::iterator i = negative_casts.begin();
 	while (i != negative_casts.end())
@@ -501,7 +501,9 @@ bool find_negative_struct_cast_parent(tid_t child_id, asize_t offset, char * par
 
 		if (find_negative_struct_cast_parent_r(struc_candidate, child_id, offset))
 		{
-			get_struc_name(id, parent_name, parent_name_len);
+			qstring name;
+			get_struc_name(&name, id);
+			qstrncpy(parent_name, name.c_str(), parent_name_len);
 			return true;
 		}
 	}	
@@ -540,7 +542,7 @@ bool can_be_recast(void * ud)
 	if(var->op != cot_var || num->op != cot_num)
 		return false;
 	
-	typestring vartype = var->type;
+	tinfo_t vartype = var->type;
 	if (!vartype.is_ptr())
 		return false;
 	vartype.remove_ptr_or_array();
@@ -583,10 +585,10 @@ void convert_test(cexpr_t *e)
 			int mem_ptr_offset = 0;
 
 
-			typestring vartype = var->type;
+			tinfo_t vartype = var->type;
 
 			int offset = num->numval();
-			typestring t;
+			tinfo_t t;
 			negative_cast_t * cache = find_cached_cast(vartype, offset);
 			if (cache)
 			{
@@ -618,10 +620,10 @@ void convert_test(cexpr_t *e)
 						if( ! parent_struc )
 							continue;
 
-						char parent_struc_name[MAXSTR];
-						get_struc_name(parent_struc_tid, parent_struc_name, MAXSTR);
+						qstring parent_struc_name;
+						get_struc_name(&parent_struc_name, parent_struc_tid);
 						
-						t = make_pointer( create_numbered_type_from_name(parent_struc_name) );
+						t = make_pointer( create_numbered_type_from_name(parent_struc_name.c_str()) );
 						//t = make_pointer( create_typedef(parent_struc_name) );								
 						mem_ptr_offset = vec[i].offset - offset;
 						mem_ptr = mem_ptr_offset != 0;
@@ -640,10 +642,10 @@ void convert_test(cexpr_t *e)
 				}
 				if(!found)
 				{
-					char var_struct_name[MAXNAMELEN];
-					get_struc_name(var_struct_id, var_struct_name, MAXNAMELEN);
+					qstring var_struct_name;
+					get_struc_name(&var_struct_name, var_struct_id);
 
-					msg("[Hexrays-Tools] negative casts: !find_negative_struct_cast_parent: %s, offset: %d\n", var_struct_name, offset);
+					msg("[Hexrays-Tools] negative casts: !find_negative_struct_cast_parent: %s, offset: %d\n", var_struct_name.c_str(), offset);
 					return;
 				}
 			}			
@@ -663,7 +665,7 @@ void convert_test(cexpr_t *e)
 			{
 				carg_t * arg3 = new carg_t();
 				char type_text[MAXSTR];
-				typestring t2 = t;
+				tinfo_t t2 = t;
 				t2.remove_ptr_or_array();	
 				t2.print(type_text, MAXSTR);
 
@@ -738,7 +740,7 @@ bool idaapi change_negative_cast_callback(void *ud)
 		return false;
 	cexpr_t *e = vu.item.e;
 
-	typestring from;
+	tinfo_t from;
 	int offset = 0;
 
 	if (e->op == cot_helper)
@@ -784,13 +786,13 @@ bool idaapi change_negative_cast_callback(void *ud)
 		offset = num->numval();
 		if (cast)
 		{
-			typestring t = cast->type;
+			tinfo_t t = cast->type;
 			t.remove_ptr_or_array();
 			offset *= t.size();
 		}
 	}
 
-	typestring t;
+	tinfo_t t;
 	negative_cast_t * cache = find_cached_cast(from, offset);
 	if (cache)
 	{
