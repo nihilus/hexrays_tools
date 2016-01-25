@@ -34,7 +34,7 @@
 typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
-typedef unsigned long ulong;
+//typedef unsigned long ulong;
 
 typedef          char   int8;
 typedef   signed char   sint8;

@@ -1,6 +1,6 @@
 #pragma once
 
-extern tid_t get_struc_from_typestring(typestring t);
+extern tid_t get_struc_from_typestring(tinfo_t t);
 extern bool my_atoea(const char * str_, ea_t * pea );
 
 template <typename T, int addr> class C
@@ -47,4 +47,4 @@ template <typename T> size_t get_idx_of(qvector<T> * vec, T *item)
 
 extern int get_idx_of_lvar(vdui_t &vu, lvar_t *lvar);
 
-extern typestring create_numbered_type_from_name(const char * name);
+extern tinfo_t create_numbered_type_from_name(const char * name);

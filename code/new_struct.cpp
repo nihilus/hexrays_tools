@@ -128,7 +128,7 @@ struct ida_local ptr_checker_t : public ctree_parentee_t
 					{
 						idxs.insert(new_var_idx);
 						offsets[new_var_idx] = cur_var_offset + uval_t(delta);
-						msg("scanning also var %d + %d\n", ex->x->v.idx, uval_t(delta) );
+						msg("[Hexrays-Tools] scanning also var %d + %d\n", ex->x->v.idx, uval_t(delta) );
 					}
 				}
 			}
@@ -245,7 +245,7 @@ struct ida_local ptr_checker_t : public ctree_parentee_t
 						{
 							idxs.insert(e->x->v.idx);
 							offsets[new_var_idx] = offset_for_var_idx(old_var_idx);
-							msg("scanning also var %d\n", e->x->v.idx);
+							msg("[Hexrays-Tools] scanning also var %d\n", e->x->v.idx);
 						}
 					}
 				}
@@ -520,7 +520,7 @@ bool can_be_converted_to_ptr2(vdui_t &vu, ctree_item_t & item, field_info_t * fi
 		{
 			if (i->second != fields->current_offset)
 			{
-				int answer = askyn_c(1, "Do you want to set master offset to %d ? (instead of %d)", i->second, fields->current_offset);
+				int answer = askyn_c(1, "[Hexrays-Tools] Do you want to set master offset to %d ? (instead of %d)", i->second, fields->current_offset);
 				if (answer == -1)
 					return false;
 				if ( answer == 1)
@@ -537,7 +537,7 @@ bool can_be_converted_to_ptr2(vdui_t &vu, ctree_item_t & item, field_info_t * fi
 		{
 			fields->function_adjustments[ cfunc->entry_ea ]  = fields->current_offset;	
 		}
-		msg("scanning varidx: %08X\n", varidx);
+		msg("[Hexrays-Tools] scanning varidx: %08X\n", varidx);
 	}
 	ptr_checker_t pc(varidx, fields != NULL, fields);
 	if ( !pc.apply_to((citem_t*)&cfunc->body, NULL) )
@@ -551,7 +551,7 @@ bool can_be_converted_to_ptr2(vdui_t &vu, ctree_item_t & item, field_info_t * fi
 			typedef decltype(p.second) TMP;
 			std::for_each(p.second.begin(), p.second.end(), [&](TMP::value_type & x)
 			{
-				msg("ea: 0x%08X  loc: %08X defea: %08X offset: %d\n", p.first, x.second.location, x.second.defea, x.first);
+				msg("[Hexrays-Tools] ea: 0x%08X  loc: %08X defea: %08X offset: %d\n", p.first, x.second.location, x.second.defea, x.first);
 			});		
 		});
 	}
@@ -621,7 +621,7 @@ bool field_info_t::convert_to_strtype_info(strtype_info_v2_t *strinfo, field_inf
 				}			
 			}
 			mi.size = mi.type.size();
-#if IDA_SDK_VERSION <= 610
+#if IDA_SDK_VERSION == 630
 			mi.name = create_field_name.call(&t, mi.offset); //170C8AA0 - int create_field_name(qstring *a1, typestring *a2, int offset)
 			mi.fields = dummy_plist_for.call(mi.type.u_str());
 #else
@@ -679,7 +679,7 @@ bool structure_from_restype_resfields(qstring &varname, typestring &out_type, ty
 	char * declaration = (char *)result.c_str();
 	while(1)
 	{
-		declaration = asktext(sizeof(answer), answer, declaration, "The following new type will be created", strucname.c_str());
+		declaration = asktext(sizeof(answer), answer, declaration, "[Hexrays-Tools] The following new type will be created", strucname.c_str());
 		if(!declaration)
 		{
 			return false;
@@ -697,7 +697,7 @@ bool structure_from_restype_resfields(qstring &varname, typestring &out_type, ty
 		}
 		else
 		{
-			warning("Could not create %s, maybe it already exists?", name.c_str());
+			warning("[Hexrays-Tools] Could not create %s, maybe it already exists?", name.c_str());
 			continue;
 		}
 	}

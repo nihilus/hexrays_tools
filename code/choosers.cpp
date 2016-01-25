@@ -40,10 +40,11 @@ void idaapi matched_structs_with_offsets::get_type_line(void *obj,uint32 n,char 
 		member_t * member = 0;
 		if(struct_get_member(get_struc(id), ms.offset, &member) && member)
 		{
-			typestring type;
+			//typestring type;
+			tinfo_t type;
 			if(get_member_type(member, &type))
 			{
-				type.print(type_str, MAXSTR);
+				type.print(new qstring(type_str));
 			}
 		}
 		qstpncpy(arrptr[0],  name, MAXSTR);

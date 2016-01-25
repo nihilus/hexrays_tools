@@ -175,7 +175,7 @@ bool fill_graphreferences()
 	
 	fill_nonempty();
 	DWORD t2 = GetTickCount();
-	msg("%d graphreferences refreshed in %d ms\n", graph_references.size(), t2 - t1);
+	msg("[Hexrays-Tools] %d graphreferences refreshed in %d ms\n", graph_references.size(), t2 - t1);
 	cache_dirty = false;
 	return true;
 }
@@ -308,7 +308,7 @@ bool fill_backreferences_()
 		again_counter++;
 	} while(again);
 	DWORD t3 = GetTickCount();
-	msg("backreferences refreshed in %d ms, expand took %d ms, again counter: %d\n", t3 - t1, t3-t2, again_counter);
+	msg("[Hexrays-Tools] backreferences refreshed in %d ms, expand took %d ms, again counter: %d\n", t3 - t1, t3-t2, again_counter);
 	cache_dirty = false;
 	return true;
 }
@@ -643,7 +643,7 @@ void convert_test(cexpr_t *e)
 					char var_struct_name[MAXNAMELEN];
 					get_struc_name(var_struct_id, var_struct_name, MAXNAMELEN);
 
-					msg("negative casts: !find_negative_struct_cast_parent: %s, offset: %d\n", var_struct_name, offset);
+					msg("[Hexrays-Tools] negative casts: !find_negative_struct_cast_parent: %s, offset: %d\n", var_struct_name, offset);
 					return;
 				}
 			}			
@@ -804,7 +804,7 @@ bool idaapi change_negative_cast_callback(void *ud)
 	char declaration[MAXSTR];
 	char * answer;
 
-	while(answer = askstr(HIST_TYPE, definition, "Gimme new negative cast type"))
+	while(answer = askstr(HIST_TYPE, definition, "[Hexrays-Tools] Gimme new negative cast type"))
 	{
 		qstrncpy(declaration, answer, MAXSTR);
 		//notice:

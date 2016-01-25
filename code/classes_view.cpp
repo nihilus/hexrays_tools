@@ -114,7 +114,7 @@ static bool idaapi change_fnc_name_cb(void *ud)
   get_true_name(BADADDR, ea, name, MAXNAMESIZE);
 
   char * answer;
-  while(answer = askstr(HIST_TYPE, name, "Enter new function name"))
+  while(answer = askstr(HIST_TYPE, name, "[Hexrays-Tools] Enter new function name"))
   {
 	  qstrncpy(name, answer, MAXNAMESIZE);
 	  if ( set_name(ea, name) )
@@ -149,14 +149,15 @@ static bool set_first_parameter_for_one_place(class_place_t *place)
 			return false;
 	}
 
-	func_type_info_t fti;
+	func_type_data_t fti;
+	
 	if(!build_funcarg_info(idati, type.c_str(), fields.c_str(), &fti, 0))
 		return false;
 
 	char class_name[MAXNAMELEN];
 	get_class_name(tid, class_name, MAXNAMELEN);
 	
-	typestring ptr =  make_pointer(create_numbered_type_from_name(class_name));//make_pointer(create_typedef(class_name));
+	tinfo_t ptr =  make_pointer(create_numbered_type_from_name(class_name));//make_pointer(create_typedef(class_name));
 	if (fti.size())
 	{
 		fti[0].type = ptr;
@@ -243,7 +244,7 @@ static bool idaapi changetype_cb(void *ud)
 pokracuj:
   char declaration[MAXSTR];
   char * answer;
-  while(answer = askstr(HIST_TYPE, name, "Enter new function type"))
+  while(answer = askstr(HIST_TYPE, name, "[Hexrays-Tools] Enter new function type"))
   {
 	  qstrncpy(declaration, answer, MAXSTR);
 	  //notice:
@@ -363,7 +364,7 @@ static bool idaapi add_from_structs_cb(void *ud)
 		{
 			//msg("adding class %p\n", id);
 			add_class(id);
-			typestring t;
+			tinfo_t t;
 			if( get_member_type(&struc->members[0], &t) )
 			{
 				tid_t child = get_struc_from_typestring(t);
@@ -435,7 +436,7 @@ static bool jumping(sample_info_t *si, int shift)
 		{
 			tid_t id = get_class_by_idx( place->idx );
 			open_structs_window(id);
-			msg("Enter has been pressed");
+			msg("[Hexrays-Tools] Enter has been pressed");
 		}
 		break;
 	case 1:				  
@@ -497,7 +498,7 @@ static bool idaapi ct_keyboard(TCustomControl * /*v*/, int key, int shift, void 
 			  return true;
 		  }
 
-        msg("The hotkey 'N' has been pressed\n");
+        msg("[Hexrays-Tools] The hotkey 'N' has been pressed\n");
         return false;
 
 	  case 'Y':
@@ -552,18 +553,18 @@ static void idaapi ct_popup(TCustomControl *v, void *ud)
 {  
   set_custom_viewer_popup_menu(v, NULL);
   // Create right-click menu on the fly
-  add_popup(v, "Import from Structures", "", add_from_structs_cb, ud);
+  add_popup(v, "[Hexrays-Tools] Import from Structures", "", add_from_structs_cb, ud);
   if ( is_at_function(v) )
   {
 	  if (!is_something_selected(v))
 	  {
-		  add_popup(v, "Rename function", "N", change_fnc_name_cb, ud);
-		  add_popup(v, "Retype function", "Y", changetype_cb, ud);
+		  add_popup(v, "[Hexrays-Tools] Rename function", "N", change_fnc_name_cb, ud);
+		  add_popup(v, "[Hexrays-Tools] Retype function", "Y", changetype_cb, ud);
 	  }
-	  add_popup(v, "Set first argument type", "", set_first_parameter_cb, ud);
+	  add_popup(v, "[Hexrays-Tools] Set first argument type", "", set_first_parameter_cb, ud);
   }
-  add_popup(v, "Scan for class functions", "S", scan_cb, ud);
-  add_popup(v, "add constructor / destructor", "", add_constructor_destuctor_cb, ud);   
+  add_popup(v, "[Hexrays-Tools] Scan for class functions", "S", scan_cb, ud);
+  add_popup(v, "[Hexrays-Tools] add constructor / destructor", "", add_constructor_destuctor_cb, ud);   
 }
 
 //---------------------------------------------------------------------------
@@ -597,7 +598,7 @@ static int idaapi ui_callback(void *ud, int code, va_list va)
           if ( place == NULL )
             return 0;
 		  class_place_t *spl = (class_place_t *)place;
-          hint.sprnt("Hint for line %d", spl->idx);
+          hint.sprnt("[Hexrays-Tools] Hint for line %d", spl->idx);
           *important_lines = 1;
           return 1;
         }
@@ -622,13 +623,13 @@ static int idaapi ui_callback(void *ud, int code, va_list va)
 bool idaapi show_classes_view(void *ud)
 {
   HWND hwnd = NULL;
-  TForm *form = find_tform("Classes");
+  TForm *form = find_tform("[Hexrays-Tools] Classes");
   if ( form != NULL )
   {
 	  switchto_tform(form, true);
 	  return true;
   }  
-  form = create_tform("Classes", &hwnd);
+  form = create_tform("[Hexrays-Tools] Classes", &hwnd);
   // allocate block to hold info about our sample view
   sample_info_t *si = new sample_info_t(form);
   

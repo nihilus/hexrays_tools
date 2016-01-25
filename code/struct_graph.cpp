@@ -67,7 +67,7 @@ static int idaapi callback(void *, int code, va_list va)
 		// in: mutable_graph_t *g
 		// out: 0-not implemented
 		//      1-graph layout calculated by the plugin
-		msg("calculating graph layout...\n");
+		msg("[Hexrays-Tools] calculating graph layout...\n");
 		break;
 
 	case grcode_changed_current:
@@ -111,10 +111,10 @@ static int idaapi callback(void *, int code, va_list va)
 				//msg("toolbutton %d\n", m->b);
 				break;
 			case git_text:
-				msg("text (x,y)=(%d,%d)\n", m->p.x, m->p.y);
+				msg("[Hexrays-Tools] text (x,y)=(%d,%d)\n", m->p.x, m->p.y);
 				break;
 			case git_elp:
-				msg("edge layout point (%d, %d) #%d\n", m->elp.e.src, m->elp.e.dst, m->elp.pidx);
+				msg("[Hexrays-Tools] edge layout point (%d, %d) #%d\n", m->elp.e.src, m->elp.e.dst, m->elp.pidx);
 				break;
 			}
 		}
@@ -141,7 +141,7 @@ static int idaapi callback(void *, int code, va_list va)
 				}
 			}
 			else
-				msg("edge (%d, %d) layout point #%d\n", s->elp.e.src, s->elp.e.dst, s->elp.pidx);
+				msg("[Hexrays-Tools] edge (%d, %d) layout point #%d\n", s->elp.e.src, s->elp.e.dst, s->elp.pidx);
 		}
 		break;
 
@@ -153,7 +153,7 @@ static int idaapi callback(void *, int code, va_list va)
 		{
 			mutable_graph_t *g = va_arg(va, mutable_graph_t *);
 			intset_t &nodes    = *va_arg(va, intset_t *);
-			msg("%p: creating group", g);
+			msg("[Hexrays-Tools] %p: creating group", g);
 			/*
 			for ( intset_t::iterator p=nodes.begin(); p != nodes.end(); ++p )
 			msg(" %d", *p);
@@ -170,7 +170,7 @@ static int idaapi callback(void *, int code, va_list va)
 		{
 			mutable_graph_t *g = va_arg(va, mutable_graph_t *);
 			int group          = va_argi(va, int);
-			msg("%p: deleting group %d\n", g, group);
+			msg("[Hexrays-Tools] %p: deleting group %d\n", g, group);
 		}
 		break;
 
@@ -184,7 +184,7 @@ static int idaapi callback(void *, int code, va_list va)
 			mutable_graph_t *g = va_arg(va, mutable_graph_t *);
 			int group          = va_argi(va, int);
 			bool expand        = va_argi(va, bool);
-			msg("%p: %scollapsing group %d\n", g, expand ? "un" : "", group);
+			msg("[Hexrays-Tools] %p: %scollapsing group %d\n", g, expand ? "un" : "", group);
 		}
 		break;
 
@@ -382,7 +382,7 @@ bool idaapi save_to_file(void *ud)
 {    
 		
 	char * path;
-	if (path = askfile_c(1, "*.gdl", "Choose filename to save the graph to."))
+	if (path = askfile_c(1, "*.gdl", "[Hexrays-Tools] Choose filename to save the graph to."))
 	{
 		graph_viewer_t *gv = (graph_viewer_t *)ud;
 		mutable_graph_t *g = get_viewer_graph(gv);
@@ -421,7 +421,7 @@ bool idaapi menu_callback(void *ud)
 void idaapi run_graph(int /*arg*/)
 {
 	HWND hwnd = NULL;
-	TForm *form = create_tform("Structures graph", &hwnd);
+	TForm *form = create_tform("[Hexrays-Tools] Structures graph", &hwnd);
 	if ( hwnd != NULL )
 	{
 		// get a unique graph id
@@ -436,9 +436,9 @@ void idaapi run_graph(int /*arg*/)
 		if ( gv != NULL )
 		{
 			viewer_fit_window(gv);
-			viewer_add_menu_item(gv, "Show VT", menu_callback, gv, NULL, 0);
-			viewer_add_menu_item(gv, "Choose visible types", choose_types, gv, NULL, 0);
-			viewer_add_menu_item(gv, "Save to file", save_to_file, gv, NULL, 0);
+			viewer_add_menu_item(gv, "[Hexrays-Tools] Show VT", menu_callback, gv, NULL, 0);
+			viewer_add_menu_item(gv, "[Hexrays-Tools] Choose visible types", choose_types, gv, NULL, 0);
+			viewer_add_menu_item(gv, "[Hexrays-Tools] Save to file", save_to_file, gv, NULL, 0);
 		}
 	}
 	else

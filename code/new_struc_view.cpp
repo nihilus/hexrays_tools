@@ -250,7 +250,7 @@ bool idaapi show_function_list_cb(void *ud)
 	}
 	if(fl.functions.size())
 	{
-		fl.choose("Detected functions");
+		fl.choose("[Hexrays-Tools] Detected functions");
 		if (fl.choosed>0)
 			fi.visited_functions.insert(fl.functions[fl.choosed-1]);
 		fl.open_pseudocode();		
@@ -332,9 +332,9 @@ static bool idaapi jump_to_next_function_cb(void *ud)
 				}
 				{
 				 	if(argnum->second.arg_cnt == argcnt)
-						msg("function @ %08X argument nr %d\n", argnum->first, argnum->second.arg_num);
+						msg("[Hexrays-Tools] function @ %08X argument nr %d\n", argnum->first, argnum->second.arg_num);
 					else
-						msg("function @ %08X has different arguments count\n", argnum->first);
+						msg("[Hexrays-Tools] function @ %08X has different arguments count\n", argnum->first);
 				}
 			}
 			//jump to global variable
@@ -349,8 +349,9 @@ static bool idaapi jump_to_next_function_cb(void *ud)
 					ptr.sprnt("%08X", locator.found_expr);
 
 					{
-#if IDA_SDK_VERSION >= 630
-						auto strvec = ui->cfunc->get_pseudocode();						
+#if IDA_SDK_VERSION == 630
+						auto & strvec = ui->sv;
+						//auto strvec = ui->cfunc->get_pseudocode();						
 #else
 						auto & strvec = ui->sv;
 #endif						
@@ -423,7 +424,7 @@ static bool idaapi change_item_type_cb(void *ud)
 	print_type_to_one_line(strtype, MAXSTR, idati, type.c_str(), "dummy", 0, 0, 0);
 	char declaration[MAXSTR];
 	char * answer;
-	while(answer = askstr(HIST_TYPE, strtype, "Enter type"))
+	while(answer = askstr(HIST_TYPE, strtype, "[Hexrays-Tools] Enter type"))
 	{
 		qstrncpy(declaration, answer, MAXSTR);
 		//notice:
@@ -575,18 +576,18 @@ static void idaapi ct_popup(TCustomControl *v, void *ud)
 	// dynamically create custom popup items
 	set_custom_viewer_popup_menu(v, NULL);
 	// Create right-click menu on the fly
-	add_popup(v, "pack substruct", "P", pack_cb, ud);
-	add_popup(v, "change type", "Y", change_item_type_cb, ud);	
-	add_popup(v, "make array", "R", make_array_cb, ud);
+	add_popup(v, "[Hexrays-Tools] pack substruct", "P", pack_cb, ud);
+	add_popup(v, "[Hexrays-Tools] change type", "Y", change_item_type_cb, ud);	
+	add_popup(v, "[Hexrays-Tools] make array", "R", make_array_cb, ud);
 
 	new_struc_info_t  * si = (new_struc_info_t *)ud;  
 	if (si && si->fi && ( si->fi->function_adjustments.size() >0) )
 	{
-		add_popup(v, "show function list", "", show_function_list_cb, ud);
+		add_popup(v, "[Hexrays-Tools] show function list", "", show_function_list_cb, ud);
 	}
 	if (si && si->fi && ( (si->fi->function_adjustments.size() - si->fi->visited_functions.size()) >0))
 	{
-		add_popup(v, "jump to next function in function list", "X", jump_to_next_function_cb, ud);
+		add_popup(v, "[Hexrays-Tools] jump to next function in function list", "X", jump_to_next_function_cb, ud);
 	}
 	//function_list
 	//add_popup(v, "add constructor / destructor", "", add_constructor_destuctor, ud); 
@@ -622,7 +623,7 @@ static int idaapi ui_callback(void *ud, int code, va_list va)
 				if ( place == NULL )
 					return 0;
 				new_struc_place_t *spl = (new_struc_place_t *)place;
-				hint.sprnt("Hint for line %d", spl->idx);
+				hint.sprnt("[Hexrays-Tools] Hint for line %d", spl->idx);
 				*important_lines = 1;
 				return 1;
 			}
@@ -649,7 +650,7 @@ bool idaapi show_new_struc_view(field_info_t * fi)
 	//TODO: this only permits one instance of field_info_t to be used in ida
 	//in future we want to be able to have more instances
 	//so add TForm * member to field_info_t and set it here
-	TForm *form = find_tform("new structure");
+	TForm *form = find_tform("[Hexrays-Tools] new structure");
 	if ( form != NULL )
 	{
 		
@@ -657,7 +658,7 @@ bool idaapi show_new_struc_view(field_info_t * fi)
 		return true;
 	}
 	HWND hwnd = NULL;
-	form = create_tform("new structure", &hwnd);
+	form = create_tform("[Hexrays-Tools] new structure", &hwnd);
 	// allocate block to hold info about our sample view
 	new_struc_info_t *si = new new_struc_info_t(form);
 	// create two place_t objects: for the minimal and maximal locations

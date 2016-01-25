@@ -6,10 +6,10 @@
 
 signed int __cdecl log2ceil(__int64 a1);
 
-extern typestring t_char;
-extern typestring t_byte;
+//extern typestring t_char;
+//extern typestring t_byte;
 
-#if IDA_SDK_VERSION <= 610
+#if IDA_SDK_VERSION == 630
 
 //v6 0x170C8AA0, ... v61 0x17035E90
 extern C<qstring  __cdecl (typestring *a2, int offset), 0x17035E90> create_field_name;
@@ -20,7 +20,7 @@ extern C<typestring  __cdecl (const type_t *), 0x17034C50> dummy_plist_for;
 //V6 0x170C95C0 ... V61 17034B00
 extern C<typestring __cdecl (int a2), 0x17034B00> make_dt_;
 #endif
-extern typestring make_dt(int a2);
+extern tinfo_t make_dt(int a2);
 
 //C<int __cdecl (type_t *, uint , const char *a3), 0x170C7230> make_dtname;
 extern int make_dtname(type_t * vysl, int max, const char *name);
@@ -46,7 +46,7 @@ struct mba_t_
   int field_7C;
   int field_80;
   char field_84[32];
-  typestring typestring;
+  tinfo_t typestring;
   char gap_B0[4];
   lvar_t *lvar_array;
   _DWORD max_idx;

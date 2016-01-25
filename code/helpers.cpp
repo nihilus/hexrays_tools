@@ -11,9 +11,9 @@
 
 #include "helpers.h"
 
-tid_t get_struc_from_typestring_my(typestring t)
+tid_t get_struc_from_typestring_my(tinfo_t t)
 {
-	typestring tmp = t;
+	tinfo_t tmp = t;
 	//until I get better solution, compile this with /EHsa
 	try
 	{
@@ -25,13 +25,13 @@ tid_t get_struc_from_typestring_my(typestring t)
 	catch( char * ex)
 	{
 		t = tmp;
-		while(t.length()>0 && t[0]!='=')
-			t = t.substr(1);
+		while(t.get_size() > 0);
+			//t = t.substr(1);
 	}
 
 	if ( t.is_struct() )
 	{	
-		const type_t * ptr = &t[1];
+		const type_t * ptr = (type_t*)t.get_realtype();
 		/*
 		if ( get_dt(ptr) != 0 )
 		return BADNODE; // this is an inplace definition, fail

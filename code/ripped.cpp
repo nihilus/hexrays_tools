@@ -3,8 +3,8 @@
 #include "ripped.h"
 
 
-typestring t_char = "2";
-typestring t_byte = "\x11";
+//tinfo_t t_char = "2";
+//tinfo_t t_byte = "\x11";
 
 signed int __cdecl log2ceil(__int64 a1)
 {
@@ -36,23 +36,24 @@ signed int __cdecl log2ceil(__int64 a1)
 }
 
 
-#if IDA_SDK_VERSION <= 610
+#if IDA_SDK_VERSION == 630
 C<qstring  __cdecl (typestring *a2, int offset), 0x17035E90> create_field_name;
 //v6 0x170C96D0 ... v61 0x17034C50
 C<typestring  __cdecl (const type_t *), 0x17034C50> dummy_plist_for;
 //V6 0x170C95C0 ... V61 17034B00
 C<typestring __cdecl (int a2), 0x17034B00> make_dt_;
 #endif
-/*
-typestring make_dt(int a2)
+
+tinfo_t make_dt(int a2)
 {
 	
 	type_t a[12];
 	type_t * konec = set_dt((type_t*)&a, a2);
-	typestring s(a, konec-a);
+	//tinfo_t s(a, konec-a);
+	tinfo_t s(konec-a);
 	return s;
 }
-*/
+
 int make_dtname(type_t * vysl, int max, const char *name)
 {
 	type_t a[12];
