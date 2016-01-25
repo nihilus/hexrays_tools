@@ -5,14 +5,14 @@ struct meminfo_v2_t
 {
 	qstring name;
 	uint64 offset;
-	typestring type;
+	tinfo_t type;
 	uint64 size;
 	typestring fields;
 };
 
 struct typerecord_t
 {
-	typestring type;
+	tinfo_t type;
 	bool enabled;
 
 	typerecord_t():enabled(true),type(){}

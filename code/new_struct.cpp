@@ -293,7 +293,7 @@ struct ida_local ptr_checker_t : public ctree_parentee_t
 			delta_defined = false;
 			}
 			*/
-			typestring t;
+			tinfo_t t;
 			handle_vtables(is_ptr, delta, i, t);
 			if ( delta_defined )
 			{
@@ -380,7 +380,7 @@ return true;
 
 //-------------------------------------------------------------------------
 // this functions assumes that the structure fields come one after another without gaps
-void strtype_info_v2_t ::build_struct_type( typestring &outtype, typestring &outfields) const
+void strtype_info_v2_t ::build_struct_type( tinfo_t &outtype, tinfo_t &outfields) const
 {
 	const strtype_info_v2_t &strinfo = *this;
 	//QASSERT(50641, (strinfo.N >> 3) == strinfo.size());
@@ -590,7 +590,7 @@ bool field_info_t::convert_to_strtype_info(strtype_info_v2_t *strinfo, field_inf
 			if ( p->first < off )
 				continue; // skip overlapping fields
 
-			typestring t;
+			tinfo_t t;
 			
 			if (!p->second.types.get_first_enabled(t))
 				continue;//skip completely disabled fields
@@ -609,7 +609,7 @@ bool field_info_t::convert_to_strtype_info(strtype_info_v2_t *strinfo, field_inf
 				//TODO: refactor	++q is this right?	nema to byt q++ ?
 				while(!enabled && ++q!=e)
 				{					
-					typestring tmp;
+					tinfo_t tmp;
 					enabled = q->second.types.get_first_enabled(tmp);
 				};
 				if (q!=e)

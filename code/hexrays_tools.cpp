@@ -36,7 +36,7 @@ extern plugin_t PLUGIN;
 static bool inited = false;
 
 bool name_for_struct_crawler(vdui_t &vu, qstring & name, lvar_t ** out_var, ea_t * ea);
-bool set_lvar_type(vdui_t * vu, lvar_t *  lv, typestring * ts);
+bool set_lvar_type(vdui_t * vu, lvar_t *  lv, tinfo_t * ts);
 bool structs_with_this_size(asize_t size);
 
 /*
@@ -198,7 +198,7 @@ static cexpr_t *find_var(vdui_t &vu)
 }
 
 
-bool jumptype(typestring t, int offset, bool virtual_calls = false)
+bool jumptype(tinfo_t t, int offset, bool virtual_calls = false)
 {
 	while(t.is_ptr_or_array())
 		t.remove_ptr_or_array();
@@ -563,7 +563,7 @@ bool show_VT_from_tid(tid_t id)
 		member_t * member = get_member(struc, 0);
 		if(member)
 		{
-			typestring t;
+			tinfo_t t;
 			if( get_member_type(member, &t) )
 			{
 				tid_t child = get_struc_from_typestring(t);
@@ -588,7 +588,7 @@ static bool idaapi show_VT(void * ud)
 		if (e->op == cot_idx)
 			e = e->x;
 		cexpr_t * var = e->x;
-		typestring t = var->type;
+		tinfo_t t = var->type;
 		if(t.empty())
 		{			
 			return false;
@@ -617,7 +617,7 @@ struct offset_locator_t : public ctree_parentee_t
 	lvar_t * var_hled;
 	std::set<int> idxs;
 	std::set<int> offsets;
-	std::map<int, typestring> types;
+	std::map<int, tinfo_t> types;
 
 	bool is_our(int idx)
 	{
@@ -708,7 +708,7 @@ struct offset_locator_t : public ctree_parentee_t
 					delta = delta1;
 				if (delta_defined2)
 					delta = delta2;
-				typestring t;				
+				tinfo_t t;				
 				if ( delta_defined1 || delta_defined2 )
 				{
 					// skip casts					
@@ -971,7 +971,7 @@ tid_t create_VT_struc(ea_t VT_ea, char * name, uval_t idx = BADADDR, unsigned in
 
 static void set_vt_type(struc_t *struc, char name_of_vt_struct[MAXSTR])
 {
-	typestring type = create_numbered_type_from_name(name_of_vt_struct);//create_typedef(name);
+	tinfo_t type = create_numbered_type_from_name(name_of_vt_struct);//create_typedef(name);
 	type = make_pointer(type);
 	member_t * member = get_member(struc, 0);
 	if(!member)
@@ -1001,7 +1001,9 @@ static bool create_VT(uval_t idx)
 
 	char name[MAXSTR];
 	memset(name, 0, sizeof(name));
-	get_struc_name(id, name, MAXSTR);
+	qstring tmpstr;
+	get_struc_name(&tmpstr, id);
+	qstrncpy(name, tmpstr.c_str(), MAXSTR);
 	qstrncat(name, "_VT", MAXSTR);
 
 	///---------------------
@@ -1549,7 +1551,7 @@ static bool new_structure_from_offset_locator(offset_locator_t &ifi, char name[M
 	{
 		asize_t offset = *it;
 		int err;
-		std::map<int, typestring>::iterator i = ifi.types.find(offset);
+		std::map<int, tinfo_t>::iterator i = ifi.types.find(offset);
 		if (i != ifi.types.end())
 		{
 			typestring ts = i->second;
@@ -1648,12 +1650,12 @@ static bool idaapi traverse_(void *ud)
 
 	//int choosed = choose2((void *)&idcka, 3, widths, sizer, get_type_line, "possible types");
 
-	char name[MAXSTR];
+	qstring name;
 	if ( choosed > 1 )
 	{
-		get_struc_name( (idcka)[choosed-2], name, MAXSTR );
+		get_struc_name(&name, (idcka)[choosed-2]);
 
-		typestring ts = create_numbered_type_from_name(name);//create_typedef(name);		
+		tinfo_t ts = create_numbered_type_from_name(name.c_str());//create_typedef(name);		
 		//var->set_lvar_type(make_pointer(ts));
 		//var->set_user_type();		
 		vu.set_lvar_type(var, make_pointer(ts));
@@ -1670,7 +1672,7 @@ static bool idaapi traverse_(void *ud)
 			typestring resfields;
 			typeinfo.build_udt_type(&restype, &resfields);
 
-			typestring ts;			
+			tinfo_t ts;			
 			if (!structure_from_restype_resfields(var->name, ts, restype, resfields))
 				return false;
 			//var->set_final_lvar_type(make_pointer(ts));
@@ -1816,7 +1818,7 @@ static bool idaapi is_vt_call_cast(void *ud, bool doit = false)
 	if(cast->op != cot_cast)
 		return false;
 
-	typestring t = memptr->x->type;
+	tinfo_t t = memptr->x->type;
 	if(!t.is_ptr())
 		return false;
 
