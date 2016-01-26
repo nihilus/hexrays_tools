@@ -349,9 +349,9 @@ static bool idaapi jump_to_next_function_cb(void *ud)
 					ptr.sprnt("%08X", locator.found_expr);
 
 					{
-#if IDA_SDK_VERSION == 630
-						auto & strvec = ui->sv;
-						//auto strvec = ui->cfunc->get_pseudocode();						
+#if IDA_SDK_VERSION >= 630
+						//auto & strvec = ui->sv;
+						auto strvec = ui->cfunc->get_pseudocode();						
 #else
 						auto & strvec = ui->sv;
 #endif						
@@ -666,7 +666,7 @@ bool idaapi show_new_struc_view(field_info_t * fi)
 	new_struc_place_t s2(fi->size()-1);
 	si->fi = fi;
 	si->cv = create_custom_viewer("", (TWinControl *)form, &s1, &s2, &s1, 0, si->fi);
-	set_custom_viewer_handlers(si->cv, ct_keyboard, ct_popup, cb_dblclick, ct_curpos, NULL, si);
+	set_custom_viewer_handlers(si->cv, ct_keyboard, ct_popup, NULL, cb_dblclick, ct_curpos, NULL, si);
 	hook_to_notification_point(HT_UI, ui_callback, si);	
 #if IDA_SDK_VERSION >= 630
 	open_tform(form, FORM_MENU|FORM_RESTORE|FORM_QWIDGET);

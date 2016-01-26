@@ -43,8 +43,8 @@ tid_t get_struc_from_typestring_my(tinfo_t t)
 		return import_type(idati, -1, name);
 	}
 	{
-		char temp[MAXSTR];
-		t.print(temp, MAXSTR);
+		qstring temp;
+		t.print(&temp);
 		//msg("get_struc_from_typestring: %s\n", tmp);
 		//QASSERT(112, false);
 	}

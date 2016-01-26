@@ -701,7 +701,7 @@ bool structure_from_restype_resfields(qstring &varname, typestring &out_type, ty
 			continue;
 		}
 	}
-	out_type = create_numbered_type_from_name( name.c_str());
+	out_type = create_numbered_type_from_name(name.c_str());
 	return true;
 }
 

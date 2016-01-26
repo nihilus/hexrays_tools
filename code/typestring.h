@@ -35,6 +35,8 @@ inline int partial_type_num(const type_t *type)
   return (int)hexdsp(hx_partial_type_num, type);
 }
 
+
+
 //--------------------------------------------------------------------------
 inline bool is_type_small_struni(const type_t *ptr)
 {
@@ -235,11 +237,21 @@ inline typestring make_pointer(const typestring &type)
   return retval;
 }
 
-//--------------------------------------------------------------------------
-inline typestring create_typedef(const char *name)
-{
-  typestring retval;
-  hexdsp(hx_create_typedef, &retval, name);
-  return retval;
-}
 
+struct meminfo_t
+{
+  DEFINE_MEMORY_ALLOCATION_FUNCS()
+  uval_t offset;
+  int size;               // not used by build_struct_type, just for speed
+  typestring type;
+  typestring fields;
+  qstring name;
+};
+
+struct strtype_info_t : public qvector<meminfo_t>
+{
+  type_t basetype;
+  int N;                // N from the type string
+  bool hexapi build_base_type(typestring *restype) const;
+  bool hexapi build_udt_type(typestring *restype, typestring *resfields);
+};

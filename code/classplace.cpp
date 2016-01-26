@@ -313,7 +313,7 @@ int ida_export class_place_t__generate(
 
 	case 2:
 		{
-			char line[MAXSTR];
+			char *line;
 			class_t * clas = get_class(tid);
 			if(!clas)
 				return 0;
@@ -323,7 +323,8 @@ int ida_export class_place_t__generate(
 				ea = clas->functions_ea[ths->subsection];
 			if (ea!=BADADDR)
 			{
-				get_colored_long_name(BADADDR, ea, line, MAXSTR);
+				qstring tmpline;
+				get_colored_long_name(&tmpline, ea);
 
 				qtype type;
 				qtype fields;  
@@ -332,6 +333,7 @@ int ida_export class_place_t__generate(
 					if (!guess_func_tinfo(get_func(ea), &type, &fields))
 						goto pokracuj; 
 				}
+				line = qstrdup(tmpline.c_str()); 
 				print_type_to_one_line(line, MAXSTR, idati, type.c_str(), line, 0, fields.c_str(), 0);
 pokracuj:
 				;				

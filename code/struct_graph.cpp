@@ -51,9 +51,9 @@ static const char *get_node_name(int n)
 	tid_t id = node_to_id(n);
 	if(id == BADNODE)
 		return "?";
-	static char name[MAXSTR];
-	get_struc_name(id, name, MAXSTR);
-	return name;
+	static qstring name;
+	get_struc_name(&name, id);
+	return name.c_str();
 }
 int last_clicked = 0;
 //--------------------------------------------------------------------------

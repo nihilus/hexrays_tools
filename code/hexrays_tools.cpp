@@ -1581,7 +1581,9 @@ static bool new_structure_from_offset_locator(offset_locator_t &ifi, char name[M
 		if( err != 0)
 			msg("[Hexrays-Tools] failed to add member at offset %d err %d\n", offset, err);
 	}
-	get_struc_name( id, name, MAXSTR );
+	qstring tmpname;
+	get_struc_name(&tmpname, id);
+	qstrncpy(name, tmpname.c_str(), MAXSTR);
 	msg("[Hexrays-Tools] created struct %s\n", name);
 	return false;
 }
@@ -1646,12 +1648,12 @@ static bool idaapi traverse_(void *ud)
 
 	//int choosed = choose2((void *)&idcka, 3, widths, sizer, get_type_line, "possible types");
 
-	char name[MAXSTR];
+	qstring name;
 	if ( choosed > 1 )
 	{
-		get_struc_name( (idcka)[choosed-2], name, MAXSTR );
+		get_struc_name(&name, (idcka)[choosed-2]);
 
-		typestring ts = create_numbered_type_from_name(name);//create_typedef(name);		
+		typestring ts = create_numbered_type_from_name(name.c_str());//create_typedef(name);		
 		//var->set_lvar_type(make_pointer(ts));
 		//var->set_user_type();		
 		vu.set_lvar_type(var, make_pointer(ts));

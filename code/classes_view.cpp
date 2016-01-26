@@ -640,7 +640,7 @@ bool idaapi show_classes_view(void *ud)
   // create a custom viewer
   si->cv = create_custom_viewer("", (TWinControl *)form, &s1, &s2, &s1, 0, &si->sv);
   // set the handlers so we can communicate with it
-  set_custom_viewer_handlers(si->cv, ct_keyboard, ct_popup, cb_dblclick, ct_curpos, NULL, si);
+  set_custom_viewer_handlers(si->cv, ct_keyboard, ct_popup, NULL, cb_dblclick, ct_curpos, NULL, si);
   // also set the ui event callback
   hook_to_notification_point(HT_UI, ui_callback, si);
   // finally display the form on the screen
