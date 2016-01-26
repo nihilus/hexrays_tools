@@ -300,6 +300,9 @@
     <ClInclude Include="structures.h" />
     <ClInclude Include="zeroizer.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="typestring.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

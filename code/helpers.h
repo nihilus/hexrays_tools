@@ -1,4 +1,5 @@
 #pragma once
+#include "typestring.h"
 
 extern tid_t get_struc_from_typestring(tinfo_t t);
 extern bool my_atoea(const char * str_, ea_t * pea );

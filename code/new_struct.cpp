@@ -167,7 +167,7 @@ struct ida_local ptr_checker_t : public ctree_parentee_t
 		return type;
 	}
 
-	void handle_vtables(bool &is_ptr, uint64 &delta, int i, tinfo_t & t)
+	void handle_vtables(bool &is_ptr, uint64 &delta, int i, typestring & t)
 	{		
 		{
 			int j = i;
@@ -195,9 +195,9 @@ struct ida_local ptr_checker_t : public ctree_parentee_t
 					tid_t tid = is_vt(obj->obj_ea, &vt_len);
 					if(tid!=BADNODE)
 					{
-						qstring name;
-						get_struc_name(&name, tid);
-						t = make_pointer(create_typedef(name.c_str()));
+						char name[MAXNAMELEN];
+						get_struc_name(tid, name, sizeof(name));
+						t = make_pointer(create_typedef(name));
 						for(unsigned int k = 0; k<vt_len; k++)
 						{
 							ea_t fncea = get_long(obj->obj_ea + 4*k );
@@ -293,7 +293,7 @@ struct ida_local ptr_checker_t : public ctree_parentee_t
 			delta_defined = false;
 			}
 			*/
-			tinfo_t t;
+			typestring t;
 			handle_vtables(is_ptr, delta, i, t);
 			if ( delta_defined )
 			{
@@ -380,7 +380,7 @@ return true;
 
 //-------------------------------------------------------------------------
 // this functions assumes that the structure fields come one after another without gaps
-void strtype_info_v2_t ::build_struct_type( tinfo_t &outtype, tinfo_t &outfields) const
+void strtype_info_v2_t ::build_struct_type( typestring &outtype, typestring &outfields) const
 {
 	const strtype_info_v2_t &strinfo = *this;
 	//QASSERT(50641, (strinfo.N >> 3) == strinfo.size());
@@ -443,7 +443,7 @@ int strtype_info_v2_t::add_gaps()
 
 
 //-------------------------------------------------------------------------
-bool strtype_info_v2_t::build_udt_type(tinfo_t &restype, tinfo_t &resfields)
+bool strtype_info_v2_t::build_udt_type(typestring &restype, typestring &resfields)
 {
 	if ( empty() )
 		return false;
@@ -590,7 +590,7 @@ bool field_info_t::convert_to_strtype_info(strtype_info_v2_t *strinfo, field_inf
 			if ( p->first < off )
 				continue; // skip overlapping fields
 
-			tinfo_t t;
+			typestring t;
 			
 			if (!p->second.types.get_first_enabled(t))
 				continue;//skip completely disabled fields
@@ -609,7 +609,7 @@ bool field_info_t::convert_to_strtype_info(strtype_info_v2_t *strinfo, field_inf
 				//TODO: refactor	++q is this right?	nema to byt q++ ?
 				while(!enabled && ++q!=e)
 				{					
-					tinfo_t tmp;
+					typestring tmp;
 					enabled = q->second.types.get_first_enabled(tmp);
 				};
 				if (q!=e)
@@ -621,7 +621,7 @@ bool field_info_t::convert_to_strtype_info(strtype_info_v2_t *strinfo, field_inf
 				}			
 			}
 			mi.size = mi.type.size();
-#if IDA_SDK_VERSION == 630
+#if IDA_SDK_VERSION >= 630
 			mi.name = create_field_name.call(&t, mi.offset); //170C8AA0 - int create_field_name(qstring *a1, typestring *a2, int offset)
 			mi.fields = dummy_plist_for.call(mi.type.u_str());
 #else
@@ -639,7 +639,7 @@ bool field_info_t::convert_to_strtype_info(strtype_info_v2_t *strinfo, field_inf
 	return true;
 }
 
-bool structure_from_restype_resfields(qstring &varname, tinfo_t &out_type, tinfo_t &restype, tinfo_t &resfields)
+bool structure_from_restype_resfields(qstring &varname, typestring &out_type, typestring &restype, typestring &resfields)
 {	
 	qstring strucname = "struct_";
 	strucname += varname;
@@ -706,7 +706,7 @@ bool structure_from_restype_resfields(qstring &varname, tinfo_t &out_type, tinfo
 }
 
 
-bool field_info_t::to_type(qstring varname, tinfo_t & out_type, strtype_info_v2_t *sti, field_info_t::iterator * bgn, field_info_t::iterator * end )
+bool field_info_t::to_type(qstring varname, typestring & out_type, strtype_info_v2_t *sti, field_info_t::iterator * bgn, field_info_t::iterator * end )
 {
 	strtype_info_v2_t sti2;
 	if (!sti)
@@ -714,8 +714,8 @@ bool field_info_t::to_type(qstring varname, tinfo_t & out_type, strtype_info_v2_
 
 	if(!convert_to_strtype_info(sti, bgn, end))
 		return false;
-	tinfo_t restype;
-	tinfo_t resfields;
+	typestring restype;
+	typestring resfields;
 	sti->build_udt_type(restype, resfields);
 	return structure_from_restype_resfields(varname, out_type, restype, resfields);
 }

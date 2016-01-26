@@ -29,9 +29,9 @@ bool extract_substruct(uval_t idx, uval_t begin, uval_t end)
 	}
 
 	int i = 1;
-	qstring struc_name2;
-	get_struc_name(&struc_name2, id);
-	char * struc_name = strdup(struc_name2.c_str());
+	char struc_name[MAXSTR];
+	get_struc_name(id, struc_name, MAXSTR);
+	
 	char * number = strstr(struc_name, "_obj_");
 	char * number2;
 	//find last _obj_
@@ -103,9 +103,7 @@ bool extract_substruct(uval_t idx, uval_t begin, uval_t end)
 	//create_typedef();
 
 	char name[MAXSTR];
-	qstring tmpname;
-	get_struc_name(&tmpname, newid);
-	qstrncpy(name, tmpname.c_str(), MAXSTR);
+	get_struc_name(newid, name, MAXSTR);
 	qstrncat(name, " dummy;", MAXSTR);
 	parse_decl(idati, name, &qname, &type, &fields, PT_VAR);
 
@@ -154,20 +152,17 @@ bool idaapi struct_has_member(struc_t * str, asize_t offset)
 void print_struct_member_name(struc_t * str, asize_t offset, char * name,  size_t len)
 {	
 	member_t * member = get_member(str, offset);
-	qstring tmpname;
 	if ( member )
 	{
 		if ( member->get_soff() == offset )
 		{
-			get_member_fullname(&tmpname, member->id);
-			qstrncpy(name, tmpname.c_str(), len);
+			get_member_fullname(member->id, name, len);
 			return;
 		}		
 		struc_t * membstr = get_sptr(member);
 		if ( membstr )
 		{
-			ssize_t s = get_struc_name(&tmpname, str->id);
-			qstrncpy(name, tmpname.c_str(), len);
+			ssize_t s = get_struc_name(str->id, name, len);
 			name[s]='.';
 			print_struct_member_name(membstr, offset - member->get_soff(), name+s+1, len-s-1);
 			return;
@@ -217,10 +212,10 @@ bool which_struct_matches_here(uval_t idx1, uval_t begin, uval_t end)
 
 	msg("found %d candidate structs\n", m.idcka.size());
 	int choosed = m.choose("possible matches");	
-	qstring name;
+	char name[MAXSTR];
 	if ( choosed > 0 )
 	{
-		get_struc_name(&name, m.idcka[choosed-1]);
+		get_struc_name( m.idcka[choosed-1], name, MAXSTR );
 		open_structs_window(m.idcka[choosed-1], 0);
 	}
 	return true; // done

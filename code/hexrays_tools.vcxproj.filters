@@ -99,4 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="typestring.h">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

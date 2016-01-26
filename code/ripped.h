@@ -9,7 +9,7 @@ signed int __cdecl log2ceil(__int64 a1);
 //extern typestring t_char;
 //extern typestring t_byte;
 
-#if IDA_SDK_VERSION == 630
+#if IDA_SDK_VERSION >= 630
 
 //v6 0x170C8AA0, ... v61 0x17035E90
 extern C<qstring  __cdecl (typestring *a2, int offset), 0x17035E90> create_field_name;

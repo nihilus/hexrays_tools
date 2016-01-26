@@ -36,7 +36,7 @@ signed int __cdecl log2ceil(__int64 a1)
 }
 
 
-#if IDA_SDK_VERSION == 630
+#if IDA_SDK_VERSION >= 630
 C<qstring  __cdecl (typestring *a2, int offset), 0x17035E90> create_field_name;
 //v6 0x170C96D0 ... v61 0x17034C50
 C<typestring  __cdecl (const type_t *), 0x17034C50> dummy_plist_for;

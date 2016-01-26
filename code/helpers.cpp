@@ -43,8 +43,8 @@ tid_t get_struc_from_typestring_my(tinfo_t t)
 		return import_type(idati, -1, name);
 	}
 	{
-		qstring temp;
-		t.print(&temp);
+		char temp[MAXSTR];
+		t.print(temp, MAXSTR);
 		//msg("get_struc_from_typestring: %s\n", tmp);
 		//QASSERT(112, false);
 	}
@@ -52,16 +52,16 @@ tid_t get_struc_from_typestring_my(tinfo_t t)
 }
 
 #if IDA_SDK_VERSION >= 630
-tid_t get_struc_from_typestring(tinfo_t t)
+tid_t get_struc_from_typestring(typestring t)
 {
-	tinfo_t tmp = t;
+	typestring tmp = t;
 	char buf[MAXSTR];
 	if(!get_name_of_named_type(buf, sizeof(buf), t.c_str()))
 		return get_struc_from_typestring_my(t);
 	return import_type(idati, -1, buf);
 }
 #else
-tid_t get_struc_from_typestring(tinfo_t t)
+tid_t get_struc_from_typestring(typestring t)
 {
 	return get_struc_from_typestring_my(t);	
 }
@@ -89,9 +89,9 @@ int get_idx_of_lvar(vdui_t &vu, lvar_t *lvar)
 	return get_idx_of(vu.cfunc->get_lvars(), lvar);
 }
 
-tinfo_t create_numbered_type_from_name(const char * name)
+typestring create_numbered_type_from_name(const char * name)
 {
-	tinfo_t out_type;
+	typestring out_type;
 	int32 ord = get_type_ordinal(idati, name);
 	char ordname[32];
 	memset(ordname, 0, sizeof(ordname));

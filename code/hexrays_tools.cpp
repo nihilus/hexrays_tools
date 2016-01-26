@@ -36,7 +36,7 @@ extern plugin_t PLUGIN;
 static bool inited = false;
 
 bool name_for_struct_crawler(vdui_t &vu, qstring & name, lvar_t ** out_var, ea_t * ea);
-bool set_lvar_type(vdui_t * vu, lvar_t *  lv, tinfo_t * ts);
+bool set_lvar_type(vdui_t * vu, lvar_t *  lv, typestring * ts);
 bool structs_with_this_size(asize_t size);
 
 /*
@@ -153,7 +153,7 @@ static cexpr_t *find_memptr_var(vdui_t &vu, bool * is_call = 0, ea_t * ea = 0 )
 			if ( e->x->op == cot_idx )
 				e = e->x;
 
-			tinfo_t t = e->x->type;
+			typestring t = e->x->type;
 			while (t.is_ptr_or_array())
 				t.remove_ptr_or_array();
 
@@ -198,7 +198,7 @@ static cexpr_t *find_var(vdui_t &vu)
 }
 
 
-bool jumptype(tinfo_t t, int offset, bool virtual_calls = false)
+bool jumptype(typestring t, int offset, bool virtual_calls = false)
 {
 	while(t.is_ptr_or_array())
 		t.remove_ptr_or_array();
@@ -563,7 +563,7 @@ bool show_VT_from_tid(tid_t id)
 		member_t * member = get_member(struc, 0);
 		if(member)
 		{
-			tinfo_t t;
+			typestring t;
 			if( get_member_type(member, &t) )
 			{
 				tid_t child = get_struc_from_typestring(t);
@@ -588,7 +588,7 @@ static bool idaapi show_VT(void * ud)
 		if (e->op == cot_idx)
 			e = e->x;
 		cexpr_t * var = e->x;
-		tinfo_t t = var->type;
+		typestring t = var->type;
 		if(t.empty())
 		{			
 			return false;
@@ -617,7 +617,7 @@ struct offset_locator_t : public ctree_parentee_t
 	lvar_t * var_hled;
 	std::set<int> idxs;
 	std::set<int> offsets;
-	std::map<int, tinfo_t> types;
+	std::map<int, typestring> types;
 
 	bool is_our(int idx)
 	{
@@ -708,7 +708,7 @@ struct offset_locator_t : public ctree_parentee_t
 					delta = delta1;
 				if (delta_defined2)
 					delta = delta2;
-				tinfo_t t;				
+				typestring t;				
 				if ( delta_defined1 || delta_defined2 )
 				{
 					// skip casts					
@@ -723,9 +723,9 @@ struct offset_locator_t : public ctree_parentee_t
 					if (t.size()>0)
 					{
 						types[(int)delta] = t;
-						qstring buff;
-						t.print(&buff);
-						msg("[Hexrays-Tools] new var: %s.%d [%s][array: %d]\n", (*lvars)[index].name.c_str(), (int)delta, buff.c_str(), is_array);
+						char buff[MAXSTR];
+						t.print(buff, sizeof(buff));
+						msg("[Hexrays-Tools] new var: %s.%d [%s][array: %d]\n", (*lvars)[index].name.c_str(), (int)delta, buff, is_array);
 					}
 					else
 						msg("[Hexrays-Tools] new var: %s.%d[array:%d]\n", (*lvars)[index].name.c_str(), (int)delta, is_array);
@@ -811,9 +811,7 @@ void idaapi get_type_line(void *obj,uint32 n,char * const *arrptr)
 	{
 		tid_t id = (*vec)[n-2];
 		asize_t size = get_struc_size(id);
-		qstring name;
-		get_struc_name(&name, id);		
-		qsnprintf(arrptr[0], MAXSTR, "%s", name);
+		get_struc_name(id, arrptr[0], MAXSTR);		
 		qsnprintf(arrptr[1], MAXSTR, "%d", size);
 		qsnprintf(arrptr[2], MAXSTR, "0x%08x", size);
 	}	
@@ -940,8 +938,8 @@ tid_t create_VT_struc(ea_t VT_ea, char * name, uval_t idx = BADADDR, unsigned in
 		char * fncname = NULL;
 		if (isFunc(fnc_flags) /*&& has_user_name(fnc_flags)*/ )
 		{
-			//if ( get_short_name(BADADDR, fncea,  funcname, sizeof(funcname)) )
-			if(get_func_name(fncea, funcname, MAXSTR))
+			if ( get_short_name(BADADDR, fncea,  funcname, sizeof(funcname)) )
+			//if(get_func_name(fncea, funcname, MAXSTR))
 				fncname = funcname;
 		}		
 		add_struc_member(newstruc, NULL, offset, dwrdflag(), NULL, 4);
@@ -971,7 +969,7 @@ tid_t create_VT_struc(ea_t VT_ea, char * name, uval_t idx = BADADDR, unsigned in
 
 static void set_vt_type(struc_t *struc, char name_of_vt_struct[MAXSTR])
 {
-	tinfo_t type = create_numbered_type_from_name(name_of_vt_struct);//create_typedef(name);
+	typestring type = create_numbered_type_from_name(name_of_vt_struct);//create_typedef(name);
 	type = make_pointer(type);
 	member_t * member = get_member(struc, 0);
 	if(!member)
@@ -1001,9 +999,7 @@ static bool create_VT(uval_t idx)
 
 	char name[MAXSTR];
 	memset(name, 0, sizeof(name));
-	qstring tmpstr;
-	get_struc_name(&tmpstr, id);
-	qstrncpy(name, tmpstr.c_str(), MAXSTR);
+	get_struc_name(id, name, MAXSTR);
 	qstrncat(name, "_VT", MAXSTR);
 
 	///---------------------
@@ -1274,19 +1270,19 @@ static bool idaapi var_testing2(void *ud)
 	if (!name_for_struct_crawler(vu, name, &lvar, &ea))
 		return false;
 
-	tinfo_t type;
+	typestring type;
 	strtype_info_v2_t sti;
 	if (!fi.to_type(name, type, &sti))
 		return false;
 	
 
 
-	tinfo_t restype = make_pointer(type);
+	typestring restype = make_pointer(type);
 	
 #if 1
 	std::for_each(fi.scanned_variables.begin(), fi.scanned_variables.end(), [&](std::pair<scanned_variables_t::key_type, scanned_variables_t::mapped_type> p)
 	{
-		tinfo_t typ = restype;
+		typestring typ = restype;
 		func_t * func = get_func(p.first);
 		if (!func)
 			return;
@@ -1321,7 +1317,7 @@ static bool idaapi var_testing2(void *ud)
 				}
 				else
 				{
-					tinfo_t tt;
+					typestring tt;
 					tt.clear();
 					
 					if (fi.types_cache.find(x.first) != fi.types_cache.end())
@@ -1504,7 +1500,7 @@ static bool idaapi convert_to_usercall(void *ud)
 		return false;
 	if ( vu.cfunc->entry_ea == BADADDR )
 		return false;
-	tinfo_t type;
+	typestring type;
 	qtype fields;		
 	if (!vu.cfunc->get_func_type(type, fields))
 		return false;
@@ -1551,10 +1547,10 @@ static bool new_structure_from_offset_locator(offset_locator_t &ifi, char name[M
 	{
 		asize_t offset = *it;
 		int err;
-		std::map<int, tinfo_t>::iterator i = ifi.types.find(offset);
+		std::map<int, typestring>::iterator i = ifi.types.find(offset);
 		if (i != ifi.types.end())
 		{
-			tinfo_t ts = i->second;
+			typestring ts = i->second;
 			ts.remove_ptr_or_array();
 			const type_t * t = ts.resolve();
 
@@ -1585,9 +1581,7 @@ static bool new_structure_from_offset_locator(offset_locator_t &ifi, char name[M
 		if( err != 0)
 			msg("[Hexrays-Tools] failed to add member at offset %d err %d\n", offset, err);
 	}
-	qstring tmpname;
-	get_struc_name(&tmpname, id);
-	qstrncpy(name, tmpname.c_str(), MAXSTR);
+	get_struc_name( id, name, MAXSTR );
 	msg("[Hexrays-Tools] created struct %s\n", name);
 	return false;
 }
@@ -1652,12 +1646,12 @@ static bool idaapi traverse_(void *ud)
 
 	//int choosed = choose2((void *)&idcka, 3, widths, sizer, get_type_line, "possible types");
 
-	qstring name;
+	char name[MAXSTR];
 	if ( choosed > 1 )
 	{
-		get_struc_name(&name, (idcka)[choosed-2]);
+		get_struc_name( (idcka)[choosed-2], name, MAXSTR );
 
-		tinfo_t ts = create_numbered_type_from_name(name.c_str());//create_typedef(name);		
+		typestring ts = create_numbered_type_from_name(name);//create_typedef(name);		
 		//var->set_lvar_type(make_pointer(ts));
 		//var->set_user_type();		
 		vu.set_lvar_type(var, make_pointer(ts));
@@ -1670,11 +1664,11 @@ static bool idaapi traverse_(void *ud)
 			int idx = get_idx_of(lvars, var);
 			strtype_info_t typeinfo;
 			vu.cfunc->gather_derefs(idx, &typeinfo);
-			tinfo_t restype;
-			tinfo_t resfields;
+			typestring restype;
+			typestring resfields;
 			typeinfo.build_udt_type(&restype, &resfields);
 
-			tinfo_t ts;			
+			typestring ts;			
 			if (!structure_from_restype_resfields(var->name, ts, restype, resfields))
 				return false;
 			//var->set_final_lvar_type(make_pointer(ts));
@@ -1727,7 +1721,7 @@ static bool idaapi is_number(void *ud)
      -> y -> something with type B
 
 */
-static bool idaapi is_cast_assign(void *ud, tinfo_t * ts)
+static bool idaapi is_cast_assign(void *ud, typestring * ts)
 {
 	vdui_t &vu = *(vdui_t *)ud;
 	if (!vu.item.is_citem())
@@ -1820,7 +1814,7 @@ static bool idaapi is_vt_call_cast(void *ud, bool doit = false)
 	if(cast->op != cot_cast)
 		return false;
 
-	tinfo_t t = memptr->x->type;
+	typestring t = memptr->x->type;
 	if(!t.is_ptr())
 		return false;
 
@@ -1861,11 +1855,11 @@ int isOKToExecuteMemory(void    *ptr,
 }
 
 
-C<char   __fastcall  (vdui_t *, lvar_t *, tinfo_t *), 0x17097C10> do_set_lvar_type;
+C<char   __fastcall  (vdui_t *, lvar_t *, typestring *), 0x17097C10> do_set_lvar_type;
 //typedef char  ( __fastcall  * do_set_lvar_type_t)(vdui_t *, lvar_t *, typestring *);
 //do_set_lvar_type_t do_set_lvar_type  = (do_set_lvar_type_t)0x17097C10;
 
-bool set_lvar_type(vdui_t * vu, lvar_t *  lv, tinfo_t * ts)
+bool set_lvar_type(vdui_t * vu, lvar_t *  lv, typestring * ts)
 {
 	
 	if(!(vu && lv && ts ))
@@ -1885,7 +1879,7 @@ bool set_lvar_type(vdui_t * vu, lvar_t *  lv, tinfo_t * ts)
 static bool idaapi cast_assign(void *ud)
 {
 	vdui_t &vu = *(vdui_t *)ud;
-	tinfo_t ts;
+	typestring ts;
 	if(!is_cast_assign(ud, &ts))
 		return false;
 
@@ -1896,7 +1890,7 @@ static bool idaapi cast_assign(void *ud)
 static bool idaapi vt_call_cast(void *ud)
 {
 	vdui_t &vu = *(vdui_t *)ud;
-	tinfo_t ts;
+	typestring ts;
 	return is_vt_call_cast(ud, true);	
 }
 
@@ -1932,11 +1926,11 @@ static bool idaapi possible_structs_for_one_offset(void *ud)
 	}
 	int choosed = m.choose("[Hexrays-Tools] structs with offset");//choose((void *)&m, 40, matched_structs_sizer, matched_structs_get_type_line, "possible types");
 
-	qstring name;
+	char name[MAXSTR];
 
 	if ( choosed > 0 )
 	{
-		get_struc_name( &name, m.idcka[choosed-1] );
+		get_struc_name( m.idcka[choosed-1], name, MAXSTR );
 		//typestring ts = create_typedef(name);
 		//var->set_final_lvar_type(make_pointer(ts));
 		//var->set_lvar_type(make_pointer(ts));
@@ -1971,10 +1965,10 @@ bool structs_with_this_size(asize_t size)
 	}
 	//TODO: use another functions
 	int choosed = m.choose("[Hexrays-Tools] structures of this size");//choose((void *)&m, 40, matched_structs_sizer, matched_structs_get_type_line, "possible types");
-	qstring name;
+	char name[MAXSTR];
 	if ( choosed > 0 )
 	{
-		get_struc_name( &name, m.idcka[choosed-1] );
+		get_struc_name( m.idcka[choosed-1], name, MAXSTR );
 		open_structs_window(m.idcka[choosed-1], 0);
 	}
 	return true; // done
@@ -2043,9 +2037,9 @@ void show_function_with_this_struct_tid_as_parameter(tid_t goal)
 		}		
 	}
 	hide_wait_box();
-	qstring name;
-	get_struc_name(&name, goal);
-	fl.choose((char *)name.c_str());
+	char name[MAXNAMESIZE];
+	get_struc_name(goal, name, MAXNAMESIZE);
+	fl.choose(name);
 	fl.open_pseudocode();
 }
 
