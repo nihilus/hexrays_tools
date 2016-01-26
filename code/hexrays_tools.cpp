@@ -36,7 +36,7 @@ extern plugin_t PLUGIN;
 static bool inited = false;
 
 bool name_for_struct_crawler(vdui_t &vu, qstring & name, lvar_t ** out_var, ea_t * ea);
-bool set_lvar_type(vdui_t * vu, lvar_t *  lv, typestring * ts);
+bool set_lvar_type(vdui_t * vu, lvar_t *  lv, tinfo_t * ts);
 bool structs_with_this_size(asize_t size);
 
 /*
@@ -198,7 +198,7 @@ static cexpr_t *find_var(vdui_t &vu)
 }
 
 
-bool jumptype(typestring t, int offset, bool virtual_calls = false)
+bool jumptype(tinfo_t t, int offset, bool virtual_calls = false)
 {
 	while(t.is_ptr_or_array())
 		t.remove_ptr_or_array();
@@ -563,7 +563,7 @@ bool show_VT_from_tid(tid_t id)
 		member_t * member = get_member(struc, 0);
 		if(member)
 		{
-			typestring t;
+			tinfo_t t;
 			if( get_member_type(member, &t) )
 			{
 				tid_t child = get_struc_from_typestring(t);
@@ -588,7 +588,7 @@ static bool idaapi show_VT(void * ud)
 		if (e->op == cot_idx)
 			e = e->x;
 		cexpr_t * var = e->x;
-		typestring t = var->type;
+		tinfo_t t = var->type;
 		if(t.empty())
 		{			
 			return false;
@@ -811,7 +811,9 @@ void idaapi get_type_line(void *obj,uint32 n,char * const *arrptr)
 	{
 		tid_t id = (*vec)[n-2];
 		asize_t size = get_struc_size(id);
-		get_struc_name(id, arrptr[0], MAXSTR);		
+		qstring tmpname;
+		get_struc_name(&tmpname, id);		
+		qsnprintf(arrptr[0], MAXSTR, "%s", tmpname.c_str());
 		qsnprintf(arrptr[1], MAXSTR, "%d", size);
 		qsnprintf(arrptr[2], MAXSTR, "0x%08x", size);
 	}	
@@ -938,8 +940,8 @@ tid_t create_VT_struc(ea_t VT_ea, char * name, uval_t idx = BADADDR, unsigned in
 		char * fncname = NULL;
 		if (isFunc(fnc_flags) /*&& has_user_name(fnc_flags)*/ )
 		{
-			if ( get_short_name(BADADDR, fncea,  funcname, sizeof(funcname)) )
-			//if(get_func_name(fncea, funcname, MAXSTR))
+			//if ( get_short_name(BADADDR, fncea,  funcname, sizeof(funcname)) )
+			if(get_func_name(fncea, funcname, MAXSTR))
 				fncname = funcname;
 		}		
 		add_struc_member(newstruc, NULL, offset, dwrdflag(), NULL, 4);
@@ -997,9 +999,9 @@ static bool create_VT(uval_t idx)
 		return false;
 	}
 
-	char name[MAXSTR];
-	memset(name, 0, sizeof(name));
-	get_struc_name(id, name, MAXSTR);
+	qstring tmpname;
+	get_struc_name(&tmpname, id);
+	char *name = qstrdup(tmpname.c_str());
 	qstrncat(name, "_VT", MAXSTR);
 
 	///---------------------
@@ -1270,19 +1272,19 @@ static bool idaapi var_testing2(void *ud)
 	if (!name_for_struct_crawler(vu, name, &lvar, &ea))
 		return false;
 
-	typestring type;
+	tinfo_t type;
 	strtype_info_v2_t sti;
 	if (!fi.to_type(name, type, &sti))
 		return false;
 	
 
 
-	typestring restype = make_pointer(type);
+	tinfo_t restype = make_pointer(type);
 	
 #if 1
 	std::for_each(fi.scanned_variables.begin(), fi.scanned_variables.end(), [&](std::pair<scanned_variables_t::key_type, scanned_variables_t::mapped_type> p)
 	{
-		typestring typ = restype;
+		tinfo_t typ = restype;
 		func_t * func = get_func(p.first);
 		if (!func)
 			return;
@@ -1317,7 +1319,7 @@ static bool idaapi var_testing2(void *ud)
 				}
 				else
 				{
-					typestring tt;
+					tinfo_t tt;
 					tt.clear();
 					
 					if (fi.types_cache.find(x.first) != fi.types_cache.end())
@@ -1393,7 +1395,7 @@ static bool idaapi remove_argument(void *ud)
 	if (vu.cfunc->entry_ea==BADADDR)
 		return false;
 
-	typestring type;
+	tinfo_t type;
 	qtype fields;	
 	if (!vu.cfunc->get_func_type(type, fields))
 		return false;
@@ -1500,7 +1502,7 @@ static bool idaapi convert_to_usercall(void *ud)
 		return false;
 	if ( vu.cfunc->entry_ea == BADADDR )
 		return false;
-	typestring type;
+	tinfo_t type;
 	qtype fields;		
 	if (!vu.cfunc->get_func_type(type, fields))
 		return false;
@@ -1723,7 +1725,7 @@ static bool idaapi is_number(void *ud)
      -> y -> something with type B
 
 */
-static bool idaapi is_cast_assign(void *ud, typestring * ts)
+static bool idaapi is_cast_assign(void *ud, tinfo_t * ts)
 {
 	vdui_t &vu = *(vdui_t *)ud;
 	if (!vu.item.is_citem())
@@ -1816,7 +1818,7 @@ static bool idaapi is_vt_call_cast(void *ud, bool doit = false)
 	if(cast->op != cot_cast)
 		return false;
 
-	typestring t = memptr->x->type;
+	tinfo_t t = memptr->x->type;
 	if(!t.is_ptr())
 		return false;
 
@@ -1861,7 +1863,7 @@ C<char   __fastcall  (vdui_t *, lvar_t *, typestring *), 0x17097C10> do_set_lvar
 //typedef char  ( __fastcall  * do_set_lvar_type_t)(vdui_t *, lvar_t *, typestring *);
 //do_set_lvar_type_t do_set_lvar_type  = (do_set_lvar_type_t)0x17097C10;
 
-bool set_lvar_type(vdui_t * vu, lvar_t *  lv, typestring * ts)
+bool set_lvar_type(vdui_t * vu, lvar_t *  lv, tinfo_t * ts)
 {
 	
 	if(!(vu && lv && ts ))
@@ -1881,7 +1883,7 @@ bool set_lvar_type(vdui_t * vu, lvar_t *  lv, typestring * ts)
 static bool idaapi cast_assign(void *ud)
 {
 	vdui_t &vu = *(vdui_t *)ud;
-	typestring ts;
+	tinfo_t ts;
 	if(!is_cast_assign(ud, &ts))
 		return false;
 
@@ -1928,11 +1930,10 @@ static bool idaapi possible_structs_for_one_offset(void *ud)
 	}
 	int choosed = m.choose("[Hexrays-Tools] structs with offset");//choose((void *)&m, 40, matched_structs_sizer, matched_structs_get_type_line, "possible types");
 
-	char name[MAXSTR];
-
 	if ( choosed > 0 )
 	{
-		get_struc_name( m.idcka[choosed-1], name, MAXSTR );
+		qstring tmpname;
+		get_struc_name(&tmpname, m.idcka[choosed-1]);
 		//typestring ts = create_typedef(name);
 		//var->set_final_lvar_type(make_pointer(ts));
 		//var->set_lvar_type(make_pointer(ts));
@@ -1967,10 +1968,10 @@ bool structs_with_this_size(asize_t size)
 	}
 	//TODO: use another functions
 	int choosed = m.choose("[Hexrays-Tools] structures of this size");//choose((void *)&m, 40, matched_structs_sizer, matched_structs_get_type_line, "possible types");
-	char name[MAXSTR];
+	qstring name;
 	if ( choosed > 0 )
 	{
-		get_struc_name( m.idcka[choosed-1], name, MAXSTR );
+		get_struc_name(&name, m.idcka[choosed-1]);
 		open_structs_window(m.idcka[choosed-1], 0);
 	}
 	return true; // done
@@ -2040,7 +2041,9 @@ void show_function_with_this_struct_tid_as_parameter(tid_t goal)
 	}
 	hide_wait_box();
 	char name[MAXNAMESIZE];
-	get_struc_name(goal, name, MAXNAMESIZE);
+	qstring tmpname;
+	get_struc_name(&tmpname, goal);
+	qstrncpy(name, tmpname.c_str(), MAXNAMESIZE);
 	fl.choose(name);
 	fl.open_pseudocode();
 }

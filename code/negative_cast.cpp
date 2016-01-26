@@ -588,7 +588,7 @@ void convert_test(cexpr_t *e)
 			tinfo_t vartype = var->type;
 
 			int offset = num->numval();
-			typestring t;
+			tinfo_t t;
 			negative_cast_t * cache = find_cached_cast(vartype, offset);
 			if (cache)
 			{
@@ -623,7 +623,7 @@ void convert_test(cexpr_t *e)
 						qstring parent_struc_name;
 						get_struc_name(&parent_struc_name, parent_struc_tid);
 						
-						t = make_pointer( create_numbered_type_from_name(parent_struc_name.c_str()) );
+						t = make_pointer(create_numbered_type_from_name(parent_struc_name.c_str()));
 						//t = make_pointer( create_typedef(parent_struc_name) );								
 						mem_ptr_offset = vec[i].offset - offset;
 						mem_ptr = mem_ptr_offset != 0;

@@ -195,9 +195,9 @@ struct ida_local ptr_checker_t : public ctree_parentee_t
 					tid_t tid = is_vt(obj->obj_ea, &vt_len);
 					if(tid!=BADNODE)
 					{
-						char name[MAXNAMELEN];
-						get_struc_name(tid, name, sizeof(name));
-						t = make_pointer(create_typedef(name));
+						qstring name;
+						get_struc_name(&name, tid);
+						t = make_pointer(create_typedef(name.c_str()));
 						for(unsigned int k = 0; k<vt_len; k++)
 						{
 							ea_t fncea = get_long(obj->obj_ea + 4*k );
